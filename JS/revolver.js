@@ -12,7 +12,7 @@ export class Revolver {
      *   dragProxy: HTMLElement;
      * }} els
      * @param {object} state
-     * @param {import('../ui.js').UIManager} ui
+     * @param {import('./ui.js').UIManager} ui
      * @param {import('./enemies.js').EnemyManager} enemyManager
      * @param {{ beginRevolverBatch: () => void; endRevolverBatch: () => void }} reactiveShell
      */

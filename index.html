@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리볼버 전투 시뮬레이터</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="muzzle-flash" class="muzzle-flash"></div>
+
+    <div class="combat-zone" id="combat-zone">
+        <div class="absolute top-6 left-6">
+            <div id="score-display" class="text-4xl font-black text-indigo-500 drop-shadow-md">SCORE: 0</div>
+            <div id="status-text" class="text-lg font-bold text-slate-500 mt-2 uppercase tracking-tighter">READY TO ENGAGE</div>
+        </div>
+    </div>
+
+    <div class="control-panel">
+        <div class="flex flex-col items-center gap-4">
+            <span class="text-sm font-black text-slate-500 uppercase tracking-widest">Ammunition</span>
+            <div id="pouch" class="grid grid-cols-4 gap-4 p-6 bg-slate-900/80 rounded-2xl border-2 border-slate-800 shadow-2xl">
+            </div>
+        </div>
+
+        <div class="relative" id="cylinder-module">
+            <div id="indicator" class="indicator">
+                <div class="text-3xl">▼</div>
+                <div class="text-xs tracking-widest font-black">ACTIVE (↺ CCW)</div>
+            </div>
+            <div id="cylinder" class="cylinder">
+                <div class="absolute inset-0 m-auto w-16 h-16 bg-slate-900 rounded-full border-4 border-slate-800 shadow-inner z-20"></div>
+                <div id="slots-anchor" class="absolute inset-0"></div>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3 text-xs text-slate-400 font-bold uppercase tracking-tighter bg-slate-900/50 p-6 rounded-2xl border border-slate-800">
+            <div class="flex items-center gap-3"><span class="px-2 py-1 bg-indigo-600 rounded text-white">L-CLICK</span> FIRE AT ENEMY</div>
+            <div class="flex items-center gap-3"><span class="px-2 py-1 bg-slate-700 rounded text-slate-200">R KEY</span> OPEN & EJECT / CLOSE</div>
+            <div class="flex items-center gap-3"><span class="px-2 py-1 bg-slate-700 rounded text-slate-200">DRAG</span> LOAD TO SLOT</div>
+        </div>
+    </div>
+
+    <div id="drag-proxy"></div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

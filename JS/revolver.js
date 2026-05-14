@@ -1,4 +1,4 @@
-import { BULLET_STATE } from '../state.js';
+import { BULLET_STATE } from './state.js';
 
 const POUCH_ROUND_CLASS = 'js-pouch-round';
 

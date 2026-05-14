@@ -1,0 +1,7 @@
+{
+  "name": "revolver",
+  "private": true,
+  "scripts": {
+    "dev": "npx --yes serve . --listen 5173"
+  }
+}

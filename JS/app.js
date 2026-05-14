@@ -1,7 +1,7 @@
-import { createReactiveGameState } from '../state.js';
-import { UIManager } from '../ui.js';
-import { EnemyManager } from '../enemies.js';
-import { Revolver } from '../revolver.js';
+import { createReactiveGameState } from './state.js';
+import { UIManager } from './ui.js';
+import { EnemyManager } from './enemies.js';
+import { Revolver } from './revolver.js';
 
 class Game {
     constructor() {

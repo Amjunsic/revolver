@@ -177,6 +177,141 @@ body {
     100% { transform: translate(300px, 600px) rotate(1000deg); opacity: 0; }
 }
 
+/* —— Combo & Fever HUD —— */
+.combo-hud {
+    position: absolute;
+    right: 1.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    pointer-events: none;
+}
+
+.combo-hud__label {
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.25em;
+    color: #64748b;
+}
+
+.combo-display {
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1;
+    color: #a5b4fc;
+    text-shadow: 0 0 24px rgba(99, 102, 241, 0.45);
+    transition: color 0.2s, text-shadow 0.2s, transform 0.15s;
+}
+
+.combo-display--hot {
+    color: #fbbf24;
+}
+
+.combo-display--buildup {
+    color: #fde68a;
+    text-shadow: 0 0 32px rgba(251, 191, 36, 0.7);
+    animation: combo-pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes combo-pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.06); }
+}
+
+.fever-timer {
+    position: absolute;
+    top: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 90;
+    width: min(280px, 70vw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    pointer-events: none;
+}
+
+.fever-timer__label {
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    color: #fbbf24;
+    text-shadow: 0 0 12px rgba(251, 191, 36, 0.8);
+}
+
+.fever-timer__track {
+    width: 100%;
+    height: 6px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.fever-timer__fill {
+    height: 100%;
+    width: 100%;
+    transform-origin: left center;
+    transform: scaleX(1);
+    background: linear-gradient(90deg, #f59e0b, #fde68a, #f59e0b);
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.8);
+}
+
+.fever-vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    background:
+        radial-gradient(ellipse 70% 55% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.15) 100%),
+        linear-gradient(90deg, rgba(245, 158, 11, 0.22) 0%, transparent 12%, transparent 88%, rgba(245, 158, 11, 0.22) 100%),
+        linear-gradient(180deg, rgba(251, 191, 36, 0.2) 0%, transparent 14%, transparent 86%, rgba(251, 191, 36, 0.2) 100%);
+    animation: none;
+}
+
+.fever-vignette--active {
+    opacity: 1;
+    animation: fever-border-flow 2s linear infinite;
+}
+
+@keyframes fever-border-flow {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(25deg); }
+}
+
+.crosshair-aura {
+    position: fixed;
+    width: 72px;
+    height: 72px;
+    margin: -36px 0 0 -36px;
+    z-index: 85;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(var(--aura-scale, 1));
+    transition: opacity 0.15s ease;
+    background:
+        radial-gradient(circle, rgba(251, 191, 36, var(--aura-opacity, 0.5)) 0%, transparent 65%),
+        conic-gradient(from 0deg, transparent, rgba(251, 191, 36, 0.35), transparent, rgba(253, 224, 71, 0.4), transparent);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.35);
+}
+
+.crosshair-aura--visible {
+    opacity: 1;
+    animation: aura-spin 1.2s linear infinite;
+}
+
+@keyframes aura-spin {
+    to { transform: scale(var(--aura-scale, 1)) rotate(360deg); }
+}
+
 #drag-proxy {
     position: fixed;
     pointer-events: none;

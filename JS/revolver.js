@@ -17,8 +17,9 @@ export class Revolver {
      * @param {import('./ui.js').UIManager} ui
      * @param {import('./enemies.js').EnemyManager} enemyManager
      * @param {{ beginRevolverBatch: () => void; endRevolverBatch: () => void }} reactiveShell
+     * @param {import('./comboFever.js').ComboFeverSystem} comboFever
      */
-    constructor(els, state, ui, enemyManager, reactiveShell) {
+    constructor(els, state, ui, enemyManager, reactiveShell, comboFever) {
         this.cylinder = els.cylinder;
         this.revolverArea = els.revolverArea;
         this.slotsAnchor = els.slotsAnchor;
@@ -30,6 +31,7 @@ export class Revolver {
         this.ui = ui;
         this.enemyManager = enemyManager;
         this.reactiveShell = reactiveShell;
+        this.comboFever = comboFever;
         this._ejectGeneration = 0;
         this._ejectTimeoutId = null;
 
@@ -97,26 +99,20 @@ export class Revolver {
     fire(e) {
         if (this.state.isOpen) return;
 
+        if (this.comboFever.isFeverActive()) {
+            this.fireFeverShot(e);
+            return;
+        }
+
         const idx = this.state.currentIndex;
         const current = this.state.chambers[idx];
 
         this.reactiveShell.beginRevolverBatch();
         try {
             if (current === BULLET_STATE.LIVE) {
-                this.muzzleFlash.style.left = `${e.clientX - 60}px`;
-                this.muzzleFlash.style.top = `${e.clientY - 60}px`;
-                this.muzzleFlash.style.opacity = '1';
-                setTimeout(() => {
-                    this.muzzleFlash.style.opacity = '0';
-                }, 50);
-
+                this.showMuzzleFlash(e);
                 this.state.chambers[idx] = BULLET_STATE.SPENT;
-                if (this.enemyManager.tryHitAt(e.clientX, e.clientY)) {
-                    this.state.score += 100;
-                    this.ui.flashStatus('TARGET NEUTRALIZED', '#4ade80');
-                } else {
-                    this.ui.flashStatus('BANG!', '#818cf8');
-                }
+                this.resolveShot(e);
             } else {
                 this.muzzleFlash.style.opacity = '0';
                 this.ui.flashStatus('CLICK', '#94a3b8');
@@ -132,12 +128,58 @@ export class Revolver {
         setTimeout(() => this.renderCylinder(), 100);
     }
 
+    fireFeverShot(e) {
+        this.showMuzzleFlash(e);
+        this.resolveShot(e);
+        this.state.currentIndex = (this.state.currentIndex + 1) % 6;
+        this.state.rotation -= 60;
+        this.applyRotation();
+        setTimeout(() => this.renderCylinder(), 100);
+    }
+
+    showMuzzleFlash(e) {
+        this.muzzleFlash.style.left = `${e.clientX - 60}px`;
+        this.muzzleFlash.style.top = `${e.clientY - 60}px`;
+        this.muzzleFlash.style.opacity = '1';
+        setTimeout(() => {
+            this.muzzleFlash.style.opacity = '0';
+        }, 50);
+    }
+
+    resolveShot(e) {
+        if (this.enemyManager.tryHitAt(e.clientX, e.clientY)) {
+            this.state.score += this.comboFever.getKillScore();
+            this.comboFever.registerHit((bonus) => {
+                this.state.score += bonus;
+            });
+            this.ui.flashStatus('TARGET NEUTRALIZED', '#4ade80');
+        } else {
+            this.comboFever.registerMiss();
+            this.ui.flashStatus('BANG!', '#818cf8');
+        }
+    }
+
     setAmmoPanelVisible(visible) {
         this.ammoPanel.classList.toggle('ammo-panel--reload', visible);
         this.ammoPanel.setAttribute('aria-hidden', visible ? 'false' : 'true');
     }
 
+    forceCloseCylinder() {
+        if (!this.state.isOpen) return;
+        this.cancelPendingEjectClear();
+        this.cancelDrag();
+        this.state.isOpen = false;
+        this.cylinder.classList.remove('cylinder-open');
+        this.setAmmoPanelVisible(false);
+        this.renderCylinder();
+    }
+
     toggleCylinder() {
+        if (this.comboFever.isFeverActive()) {
+            this.ui.flashStatus('FEVER TIME — KEEP FIRING', '#fbbf24');
+            return;
+        }
+
         if (!this.state.isOpen) {
             this.state.isOpen = true;
             this.cylinder.classList.add('cylinder-open');

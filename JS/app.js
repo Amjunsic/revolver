@@ -1,7 +1,8 @@
-import { createReactiveGameState } from './state.js';
+import { createReactiveGameState, BULLET_STATE } from './state.js';
 import { UIManager } from './ui.js';
 import { EnemyManager } from './enemies.js';
 import { Revolver } from './revolver.js';
+import { ComboFeverSystem } from './comboFever.js';
 
 class Game {
     constructor() {
@@ -9,6 +10,12 @@ class Game {
         this.ui = new UIManager({
             scoreDisplay: this.els.scoreDisplay,
             statusText: this.els.statusText,
+            comboDisplay: this.els.comboDisplay,
+            feverTimer: this.els.feverTimer,
+            feverTimerFill: this.els.feverTimerFill,
+            feverVignette: this.els.feverVignette,
+            crosshairAura: this.els.crosshairAura,
+            combatZone: this.els.combatZone,
         });
 
         let revolverRef = /** @type {Revolver | null} */ (null);
@@ -16,6 +23,21 @@ class Game {
         this.reactive = createReactiveGameState({
             onScore: (v) => this.ui.setScore(v),
             onChambersVisual: () => revolverRef?.renderCylinder(),
+        });
+
+        this.comboFever = new ComboFeverSystem({
+            onComboChange: (combo) => this.ui.setCombo(combo),
+            onScoreBonus: (amount) => this.ui.showFeverBonus(amount),
+            onFeverStart: () => {
+                this.revolver.forceCloseCylinder();
+                for (let i = 0; i < 6; i++) {
+                    this.reactive.state.chambers[i] = BULLET_STATE.LIVE;
+                }
+                revolverRef?.renderCylinder();
+                this.ui.startFeverTimer();
+                this.ui.flashStatus('FEVER TIME', '#fbbf24');
+            },
+            onFeverEnd: () => this.ui.stopFeverTimer(),
         });
 
         this.enemyManager = new EnemyManager(this.els.combatZone, () => this.reactive.state.score);
@@ -34,6 +56,7 @@ class Game {
             this.ui,
             this.enemyManager,
             this.reactive,
+            this.comboFever,
         );
         revolverRef = this.revolver;
 
@@ -43,6 +66,10 @@ class Game {
         this._boundCombatMouse = (e) => {
             if (!this.reactive.state.isDragging) this.revolver.fire(e);
         };
+        this._boundCombatMove = (e) => {
+            this.ui.updateCrosshairAura(e.clientX, e.clientY, this.comboFever.combo);
+        };
+        this._boundCombatLeave = () => this.ui.hideCrosshairAura();
     }
 
     static cacheElements() {
@@ -57,11 +84,17 @@ class Game {
             scoreDisplay: /** @type {HTMLElement} */ (document.getElementById('score-display')),
             dragProxy: /** @type {HTMLElement} */ (document.getElementById('drag-proxy')),
             muzzleFlash: /** @type {HTMLElement} */ (document.getElementById('muzzle-flash')),
+            comboDisplay: /** @type {HTMLElement} */ (document.getElementById('combo-display')),
+            feverTimer: /** @type {HTMLElement} */ (document.getElementById('fever-timer')),
+            feverTimerFill: /** @type {HTMLElement} */ (document.getElementById('fever-timer-fill')),
+            feverVignette: /** @type {HTMLElement} */ (document.getElementById('fever-vignette')),
+            crosshairAura: /** @type {HTMLElement} */ (document.getElementById('crosshair-aura')),
         };
     }
 
     init() {
         this.ui.setScore(this.reactive.state.score);
+        this.ui.setCombo(0);
         this.revolver.initPouch();
         this.revolver.setAmmoPanelVisible(false);
         this.revolver.renderCylinder();
@@ -72,10 +105,13 @@ class Game {
     attachGlobalListeners() {
         window.addEventListener('keydown', this._boundKey);
         this.els.combatZone.addEventListener('mousedown', this._boundCombatMouse);
+        this.els.combatZone.addEventListener('mousemove', this._boundCombatMove);
+        this.els.combatZone.addEventListener('mouseleave', this._boundCombatLeave);
         window.addEventListener('contextmenu', (e) => e.preventDefault());
     }
 
     loop() {
+        this.comboFever.update();
         this.enemyManager.trySpawn();
         requestAnimationFrame(() => this.loop());
     }

@@ -13,8 +13,23 @@
 <body>
 
     <div id="muzzle-flash" class="muzzle-flash"></div>
+    <div id="fever-vignette" class="fever-vignette" aria-hidden="true"></div>
 
     <div class="combat-zone" id="combat-zone">
+        <div id="fever-timer" class="fever-timer" hidden>
+            <span class="fever-timer__label">FEVER TIME</span>
+            <div class="fever-timer__track">
+                <div id="fever-timer-fill" class="fever-timer__fill"></div>
+            </div>
+        </div>
+
+        <div id="crosshair-aura" class="crosshair-aura" aria-hidden="true"></div>
+
+        <div id="combo-hud" class="combo-hud">
+            <span class="combo-hud__label">COMBO</span>
+            <span id="combo-display" class="combo-display">0</span>
+        </div>
+
         <div class="absolute top-6 left-6">
             <div id="score-display" class="text-4xl font-black text-indigo-500 drop-shadow-md">SCORE: 0</div>
             <div id="status-text" class="text-lg font-bold text-slate-500 mt-2 uppercase tracking-tighter">READY TO ENGAGE</div>

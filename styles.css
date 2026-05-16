@@ -51,7 +51,7 @@ body {
 }
 
 .ammo-panel--reload {
-    transform: translate(calc(-100% - 5rem), -50%);
+    transform: translate(calc(-100% - 15rem), -50%);
     opacity: 1;
     visibility: visible;
     pointer-events: auto;

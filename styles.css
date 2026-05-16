@@ -31,18 +31,18 @@ body {
 }
 
 .ammo-panel {
-    position: absolute;
-    left: calc(50% - 150px);
-    top: 50%;
+    position: absolute !important;
+    left: calc(50% - 150px) !important;
+    top: 50% !important;
     z-index: 60;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
     
-    transform: translate(calc(-100% - 15vw), -50%);
-    opacity: 0;
-    visibility: hidden;
+    transform: translate(calc(-100% - 20vw), -50%) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
     pointer-events: none;
     transition:
         transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
@@ -51,9 +51,9 @@ body {
 }
 
 .ammo-panel--reload {
-    transform: translate(calc(-100% - 15rem), -50%);
-    opacity: 1;
-    visibility: visible;
+    transform: translate(calc(-100% - 100px), -50%) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
     pointer-events: auto;
 }
 

@@ -32,14 +32,16 @@ body {
 
 .ammo-panel {
     position: absolute;
-    right: max(1.5rem, 4vw);
+    /* Rest against the cylinder’s left edge (300px drum + short gap) */
+    right: calc(50% + 150px + 0.5rem);
     top: 50%;
     z-index: 60;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    transform: translate(120%, -50%);
+    /* Hidden: off-screen to the left; reload slides right into place */
+    transform: translate(-120%, -50%);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -50,7 +52,7 @@ body {
 }
 
 .ammo-panel--reload {
-    transform: translate(0, -50%);
+    transform: translateY(-50%);
     opacity: 1;
     visibility: visible;
     pointer-events: auto;

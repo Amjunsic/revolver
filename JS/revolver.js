@@ -6,6 +6,7 @@ export class Revolver {
     /**
      * @param {{
      *   cylinder: HTMLElement;
+     *   revolverArea: HTMLElement;
      *   slotsAnchor: HTMLElement;
      *   pouch: HTMLElement;
      *   muzzleFlash: HTMLElement;
@@ -18,6 +19,7 @@ export class Revolver {
      */
     constructor(els, state, ui, enemyManager, reactiveShell) {
         this.cylinder = els.cylinder;
+        this.revolverArea = els.revolverArea;
         this.slotsAnchor = els.slotsAnchor;
         this.pouch = els.pouch;
         this.muzzleFlash = els.muzzleFlash;
@@ -170,27 +172,21 @@ export class Revolver {
 
         if (!this.state.isOpen) return;
 
-        const slots = document.querySelectorAll('.bullet-slot');
-        let closestSlot = null;
-        let minDistance = 60;
-
-        slots.forEach((slot) => {
-            const rect = slot.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const dist = Math.hypot(e.clientX - centerX, e.clientY - centerY);
-            if (dist < minDistance) {
-                minDistance = dist;
-                closestSlot = slot;
-            }
-        });
-
-        if (closestSlot) {
-            const idx = parseInt(closestSlot.dataset.index, 10);
-            if (this.state.chambers[idx] === BULLET_STATE.EMPTY) {
-                this.state.chambers[idx] = BULLET_STATE.LIVE;
-                this.ui.flashStatus(`CHAMBER ${idx + 1} LOADED`, '#fbbf24');
-            }
+        if (this.isPointOverRevolver(e.clientX, e.clientY)) {
+            this.tryLoadActiveChamber();
         }
+    }
+
+    isPointOverRevolver(x, y) {
+        const rect = this.revolverArea.getBoundingClientRect();
+        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    }
+
+    tryLoadActiveChamber() {
+        const idx = this.state.currentIndex;
+        if (this.state.chambers[idx] !== BULLET_STATE.EMPTY) return;
+
+        this.state.chambers[idx] = BULLET_STATE.LIVE;
+        this.ui.flashStatus(`CHAMBER ${idx + 1} LOADED`, '#fbbf24');
     }
 }

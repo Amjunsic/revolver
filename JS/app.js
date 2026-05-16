@@ -23,6 +23,7 @@ class Game {
         this.revolver = new Revolver(
             {
                 cylinder: this.els.cylinder,
+                revolverArea: this.els.revolverArea,
                 slotsAnchor: this.els.slotsAnchor,
                 pouch: this.els.pouch,
                 muzzleFlash: this.els.muzzleFlash,
@@ -46,6 +47,7 @@ class Game {
     static cacheElements() {
         return {
             cylinder: /** @type {HTMLElement} */ (document.getElementById('cylinder')),
+            revolverArea: /** @type {HTMLElement} */ (document.getElementById('cylinder-module')),
             slotsAnchor: /** @type {HTMLElement} */ (document.getElementById('slots-anchor')),
             pouch: /** @type {HTMLElement} */ (document.getElementById('pouch')),
             combatZone: /** @type {HTMLElement} */ (document.getElementById('combat-zone')),

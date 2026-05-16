@@ -173,7 +173,7 @@ export class Revolver {
         if (!this.state.isOpen) return;
 
         if (this.isPointOverRevolver(e.clientX, e.clientY)) {
-            this.tryLoadActiveChamber();
+            this.tryLoadNextEmptyChamber();
         }
     }
 
@@ -182,9 +182,22 @@ export class Revolver {
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     }
 
-    tryLoadActiveChamber() {
-        const idx = this.state.currentIndex;
-        if (this.state.chambers[idx] !== BULLET_STATE.EMPTY) return;
+    /** First empty chamber from active index forward (wraps), one bullet per drop. */
+    findNextEmptyChamberIndex() {
+        const start = this.state.currentIndex;
+        for (let offset = 0; offset < 6; offset++) {
+            const idx = (start + offset) % 6;
+            if (this.state.chambers[idx] === BULLET_STATE.EMPTY) return idx;
+        }
+        return -1;
+    }
+
+    tryLoadNextEmptyChamber() {
+        const idx = this.findNextEmptyChamberIndex();
+        if (idx === -1) {
+            this.ui.flashStatus('CYLINDER FULL', '#94a3b8');
+            return;
+        }
 
         this.state.chambers[idx] = BULLET_STATE.LIVE;
         this.ui.flashStatus(`CHAMBER ${idx + 1} LOADED`, '#fbbf24');

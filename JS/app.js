@@ -26,6 +26,7 @@ class Game {
                 revolverArea: this.els.revolverArea,
                 slotsAnchor: this.els.slotsAnchor,
                 pouch: this.els.pouch,
+                ammoPanel: this.els.ammoPanel,
                 muzzleFlash: this.els.muzzleFlash,
                 dragProxy: this.els.dragProxy,
             },
@@ -50,6 +51,7 @@ class Game {
             revolverArea: /** @type {HTMLElement} */ (document.getElementById('cylinder-module')),
             slotsAnchor: /** @type {HTMLElement} */ (document.getElementById('slots-anchor')),
             pouch: /** @type {HTMLElement} */ (document.getElementById('pouch')),
+            ammoPanel: /** @type {HTMLElement} */ (document.getElementById('ammo-panel')),
             combatZone: /** @type {HTMLElement} */ (document.getElementById('combat-zone')),
             statusText: /** @type {HTMLElement} */ (document.getElementById('status-text')),
             scoreDisplay: /** @type {HTMLElement} */ (document.getElementById('score-display')),
@@ -61,6 +63,7 @@ class Game {
     init() {
         this.ui.setScore(this.reactive.state.score);
         this.revolver.initPouch();
+        this.revolver.setAmmoPanelVisible(false);
         this.revolver.renderCylinder();
         this.attachGlobalListeners();
         this.loop();

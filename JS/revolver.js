@@ -9,6 +9,7 @@ export class Revolver {
      *   revolverArea: HTMLElement;
      *   slotsAnchor: HTMLElement;
      *   pouch: HTMLElement;
+     *   ammoPanel: HTMLElement;
      *   muzzleFlash: HTMLElement;
      *   dragProxy: HTMLElement;
      * }} els
@@ -22,6 +23,7 @@ export class Revolver {
         this.revolverArea = els.revolverArea;
         this.slotsAnchor = els.slotsAnchor;
         this.pouch = els.pouch;
+        this.ammoPanel = els.ammoPanel;
         this.muzzleFlash = els.muzzleFlash;
         this.dragProxy = els.dragProxy;
         this.state = state;
@@ -130,16 +132,24 @@ export class Revolver {
         setTimeout(() => this.renderCylinder(), 100);
     }
 
+    setAmmoPanelVisible(visible) {
+        this.ammoPanel.classList.toggle('ammo-panel--reload', visible);
+        this.ammoPanel.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    }
+
     toggleCylinder() {
         if (!this.state.isOpen) {
             this.state.isOpen = true;
             this.cylinder.classList.add('cylinder-open');
+            this.setAmmoPanelVisible(true);
             this.ejectBullets();
             this.ui.flashStatus('CYLINDER OPENED', '#6366f1');
         } else {
             this.cancelPendingEjectClear();
+            this.cancelDrag();
             this.state.isOpen = false;
             this.cylinder.classList.remove('cylinder-open');
+            this.setAmmoPanelVisible(false);
             this.ui.flashStatus('READY TO FIRE', '#94a3b8');
         }
         this.renderCylinder();
@@ -180,11 +190,16 @@ export class Revolver {
         this.dragProxy.style.top = `${e.clientY - 32}px`;
     }
 
-    stopDrag(e) {
+    cancelDrag() {
+        if (!this.state.isDragging) return;
         this.state.isDragging = false;
         this.dragProxy.style.display = 'none';
         window.removeEventListener('mousemove', this._boundMoveProxy);
         window.removeEventListener('mouseup', this._boundStopDrag);
+    }
+
+    stopDrag(e) {
+        this.cancelDrag();
 
         if (!this.state.isOpen) return;
 

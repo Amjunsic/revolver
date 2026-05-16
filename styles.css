@@ -27,6 +27,41 @@ body {
     position: relative;
     z-index: 50;
     padding: 20px;
+    overflow: hidden;
+}
+
+.ammo-panel {
+    position: absolute;
+    right: max(1.5rem, 4vw);
+    top: 50%;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    transform: translate(120%, -50%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.4s ease,
+        visibility 0.5s;
+}
+
+.ammo-panel--reload {
+    transform: translate(0, -50%);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.ammo-panel__label {
+    font-size: 0.875rem;
+    font-weight: 900;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
 }
 
 .cylinder {

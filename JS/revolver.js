@@ -28,6 +28,8 @@ export class Revolver {
         this.ui = ui;
         this.enemyManager = enemyManager;
         this.reactiveShell = reactiveShell;
+        this._ejectGeneration = 0;
+        this._ejectTimeoutId = null;
 
         this._boundMoveProxy = (e) => this.moveProxy(e);
         this._boundStopDrag = (e) => this.stopDrag(e);
@@ -135,6 +137,7 @@ export class Revolver {
             this.ejectBullets();
             this.ui.flashStatus('CYLINDER OPENED', '#6366f1');
         } else {
+            this.cancelPendingEjectClear();
             this.state.isOpen = false;
             this.cylinder.classList.remove('cylinder-open');
             this.ui.flashStatus('READY TO FIRE', '#94a3b8');
@@ -142,11 +145,24 @@ export class Revolver {
         this.renderCylinder();
     }
 
+    cancelPendingEjectClear() {
+        this._ejectGeneration++;
+        if (this._ejectTimeoutId !== null) {
+            clearTimeout(this._ejectTimeoutId);
+            this._ejectTimeoutId = null;
+        }
+    }
+
     ejectBullets() {
+        this.cancelPendingEjectClear();
+        const generation = this._ejectGeneration;
+
         const currentSlots = this.slotsAnchor.querySelectorAll('.bullet-slot > div:not(.slot-number)');
         currentSlots.forEach((el) => el.classList.add('bullet-ejecting'));
 
-        setTimeout(() => {
+        this._ejectTimeoutId = setTimeout(() => {
+            this._ejectTimeoutId = null;
+            if (generation !== this._ejectGeneration) return;
             this.state.chambers = Array(6).fill(BULLET_STATE.EMPTY);
         }, 600);
     }
@@ -199,6 +215,7 @@ export class Revolver {
             return;
         }
 
+        this.cancelPendingEjectClear();
         this.state.chambers[idx] = BULLET_STATE.LIVE;
         this.ui.flashStatus(`CHAMBER ${idx + 1} LOADED`, '#fbbf24');
     }

@@ -49,7 +49,10 @@ export function createReactiveGameState(handlers) {
             const ok = Reflect.set(target, prop, value, receiver);
             if (!ok) return false;
 
-            if (revolverBatchDepth > 0) return true;
+            if (revolverBatchDepth > 0) {
+                if (prop === 'score') handlers.onScore?.(value);
+                return true;
+            }
 
             switch (prop) {
                 case 'score':

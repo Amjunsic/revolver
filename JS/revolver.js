@@ -227,6 +227,66 @@ export class Revolver {
         window.addEventListener('mouseup', this._boundStopDrag);
     }
 
+    /**
+     * 마우스 좌표를 기준으로 실린더의 각 약실(슬롯) 위치와의 거리를 계산하여
+     * 가장 가까운 약실 인덱스 및 해당 중심 좌표, 거리를 반환합니다.
+     */
+    getClosestChamber(clientX, clientY) {
+        const cylRect = this.cylinder.getBoundingClientRect();
+        const cylCenterX = cylRect.left + cylRect.width / 2;
+        const cylCenterY = cylRect.top + cylRect.height / 2;
+        const radius = 100; // renderCylinder의 배치 반경과 일치
+
+        let closestIndex = -1;
+        let minDistance = Infinity;
+        let closestCoords = null;
+
+        for (let i = 0; i < 6; i++) {
+            // 실린더 회전각(this.state.rotation)과 12시 기점 보정(-90도)을 적용하여 현재 뷰포트 내 슬롯 중심 계산
+            const angle = i * 60 - 90 + this.state.rotation;
+            const rad = angle * (Math.PI / 180);
+            const slotX = cylCenterX + Math.cos(rad) * radius;
+            const slotY = cylCenterY + Math.sin(rad) * radius;
+
+            const dist = Math.hypot(clientX - slotX, clientY - slotY);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestIndex = i;
+                closestCoords = { x: slotX, y: slotY };
+            }
+        }
+
+        return { index: closestIndex, distance: minDistance, coords: closestCoords };
+    }
+
+    /** 타겟팅된 특정 슬롯을 시각적으로 강조하는 효과 */
+    highlightSlot(index) {
+        const slots = this.slotsAnchor.querySelectorAll('.bullet-slot');
+        slots.forEach((slot) => {
+            const i = parseInt(slot.dataset.index, 10);
+            const angle = i * 60;
+            if (i === index) {
+                // 타겟팅 시 확대 및 밝기 향상
+                slot.style.transform = `rotate(${angle}deg) scale(1.18)`;
+                slot.style.filter = 'brightness(1.3)';
+            } else {
+                slot.style.transform = `rotate(${angle}deg) scale(1)`;
+                slot.style.filter = '';
+            }
+        });
+    }
+
+    /** 슬롯 강조 효과 초기화 */
+    clearSlotHighlights() {
+        const slots = this.slotsAnchor.querySelectorAll('.bullet-slot');
+        slots.forEach((slot) => {
+            const i = parseInt(slot.dataset.index, 10);
+            const angle = i * 60;
+            slot.style.transform = `rotate(${angle}deg) scale(1)`;
+            slot.style.filter = '';
+        });
+    }
+
     moveProxy(e) {
         if (!this.state.isOpen) {
             this.dragProxy.style.left = `${e.clientX - 22}px`;
@@ -236,30 +296,32 @@ export class Revolver {
             return;
         }
 
-        const cylRect = this.cylinder.getBoundingClientRect();
-        const cylCenterX = cylRect.left + cylRect.width / 2;
-        const cylCenterY = cylRect.top + cylRect.height / 2;
+        const snapRadius = 80; // 각 개별 약실(슬롯)의 감지 반응 반경 (픽셀 단위)
+        const closest = this.getClosestChamber(e.clientX, e.clientY);
 
-        const dist = Math.hypot(e.clientX - cylCenterX, e.clientY - cylCenterY);
-        const snapRadius = 160; // 자석 끌림 및 감지 반응 반경 (픽셀 단위)
-
-        if (dist < snapRadius) {
-            // 비선형 가속도를 적용한 자성 끌림력 (가까울수록 자력이 제곱 비율로 증가)
-            const force = Math.pow((snapRadius - dist) / snapRadius, 1.5);
-            const targetX = e.clientX + (cylCenterX - e.clientX) * force;
-            const targetY = e.clientY + (cylCenterY - e.clientY) * force;
+        if (closest.index !== -1 && closest.distance < snapRadius) {
+            // 타겟 슬롯 중심을 향한 비선형 자력 강도 계산 (가까울수록 자성 증가)
+            const force = Math.pow((snapRadius - closest.distance) / snapRadius, 1.5);
+            const targetX = e.clientX + (closest.coords.x - e.clientX) * force;
+            const targetY = e.clientY + (closest.coords.y - e.clientY) * force;
 
             this.dragProxy.style.left = `${targetX - 22}px`;
             this.dragProxy.style.top = `${targetY - 32}px`;
             
-            // 약실 안으로 수축되는 시각적 피드백 효과 추가
-            this.dragProxy.style.transform = `scale(${1 - force * 0.15})`;
-            this.dragProxy.style.opacity = `${1 - force * 0.2}`;
+            // 약실 내부로 쏙 들어가는 느낌을 주기 위한 스케일 및 투명도 피드백
+            this.dragProxy.style.transform = `scale(${1 - force * 0.2})`;
+            this.dragProxy.style.opacity = `${1 - force * 0.25}`;
+
+            // 대상 슬롯 강조
+            this.highlightSlot(closest.index);
         } else {
+            // 자성 탐지 영역 밖인 경우 자유 드래그 상태
             this.dragProxy.style.left = `${e.clientX - 22}px`;
             this.dragProxy.style.top = `${e.clientY - 32}px`;
             this.dragProxy.style.transform = 'scale(1)';
             this.dragProxy.style.opacity = '1';
+
+            this.clearSlotHighlights();
         }
     }
 
@@ -271,6 +333,8 @@ export class Revolver {
         this.dragProxy.style.opacity = '';
         window.removeEventListener('mousemove', this._boundMoveProxy);
         window.removeEventListener('mouseup', this._boundStopDrag);
+        
+        this.clearSlotHighlights();
     }
 
     stopDrag(e) {
@@ -278,23 +342,23 @@ export class Revolver {
 
         if (!this.state.isOpen) return;
 
-        if (this.isPointNearCylinder(e.clientX, e.clientY)) {
-            this.tryLoadNextEmptyChamber();
+        const snapRadius = 80;
+        const closest = this.getClosestChamber(e.clientX, e.clientY);
+
+        // 드롭 시점에 특정 약실의 자성 범위 내에 위치해 있다면 해당 약실에 삽입 시도
+        if (closest.index !== -1 && closest.distance <= snapRadius) {
+            this.tryLoadChamber(closest.index);
         }
     }
 
+    /** 6개 슬롯 중 자성 영역에 하나라도 포함되어 있는지 여부 판단 (호환성 유지용) */
     isPointNearCylinder(x, y) {
-        const cylRect = this.cylinder.getBoundingClientRect();
-        const cylCenterX = cylRect.left + cylRect.width / 2;
-        const cylCenterY = cylRect.top + cylRect.height / 2;
-        
-        const dist = Math.hypot(x - cylCenterX, y - cylCenterY);
-        const snapRadius = 160; // moveProxy와 동일한 탐지 반경 적용
-        
-        return dist <= snapRadius;
+        const snapRadius = 80;
+        const closest = this.getClosestChamber(x, y);
+        return closest.index !== -1 && closest.distance <= snapRadius;
     }
 
-    /** First empty chamber from active index forward (wraps), one bullet per drop. */
+    /** 첫 번째로 만나는 비어있는 약실 인덱스 반환 (호환성 유지용) */
     findNextEmptyChamberIndex() {
         const start = this.state.currentIndex;
         for (let offset = 0; offset < 6; offset++) {
@@ -304,6 +368,20 @@ export class Revolver {
         return -1;
     }
 
+    /** 드래그한 특정 슬롯에 직접 장전 */
+    tryLoadChamber(idx) {
+        if (this.state.chambers[idx] !== BULLET_STATE.EMPTY) {
+            this.ui.flashStatus(`CHAMBER ${idx + 1} ALREADY FULL`, '#ef4444');
+            return;
+        }
+
+        this.cancelPendingEjectClear();
+        this.state.chambers[idx] = BULLET_STATE.LIVE;
+        this.ui.flashStatus(`CHAMBER ${idx + 1} LOADED`, '#fbbf24');
+        this.renderCylinder(); // 즉시 그래픽 갱신
+    }
+
+    /** 기존의 순차 장전 메서드 (호환성 유지용) */
     tryLoadNextEmptyChamber() {
         const idx = this.findNextEmptyChamberIndex();
         if (idx === -1) {
@@ -314,5 +392,6 @@ export class Revolver {
         this.cancelPendingEjectClear();
         this.state.chambers[idx] = BULLET_STATE.LIVE;
         this.ui.flashStatus(`CHAMBER ${idx + 1} LOADED`, '#fbbf24');
+        this.renderCylinder();
     }
 }

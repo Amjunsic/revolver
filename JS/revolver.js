@@ -5,13 +5,13 @@ const POUCH_ROUND_CLASS = 'js-pouch-round';
 export class Revolver {
     /**
      * @param {{
-     *   cylinder: HTMLElement;
-     *   revolverArea: HTMLElement;
-     *   slotsAnchor: HTMLElement;
-     *   pouch: HTMLElement;
-     *   ammoPanel: HTMLElement;
-     *   muzzleFlash: HTMLElement;
-     *   dragProxy: HTMLElement;
+     * cylinder: HTMLElement;
+     * revolverArea: HTMLElement;
+     * slotsAnchor: HTMLElement;
+     * pouch: HTMLElement;
+     * ammoPanel: HTMLElement;
+     * muzzleFlash: HTMLElement;
+     * dragProxy: HTMLElement;
      * }} els
      * @param {object} state
      * @param {import('./ui.js').UIManager} ui
@@ -228,14 +228,47 @@ export class Revolver {
     }
 
     moveProxy(e) {
-        this.dragProxy.style.left = `${e.clientX - 22}px`;
-        this.dragProxy.style.top = `${e.clientY - 32}px`;
+        if (!this.state.isOpen) {
+            this.dragProxy.style.left = `${e.clientX - 22}px`;
+            this.dragProxy.style.top = `${e.clientY - 32}px`;
+            this.dragProxy.style.transform = 'scale(1)';
+            this.dragProxy.style.opacity = '1';
+            return;
+        }
+
+        const cylRect = this.cylinder.getBoundingClientRect();
+        const cylCenterX = cylRect.left + cylRect.width / 2;
+        const cylCenterY = cylRect.top + cylRect.height / 2;
+
+        const dist = Math.hypot(e.clientX - cylCenterX, e.clientY - cylCenterY);
+        const snapRadius = 160; // 자석 끌림 및 감지 반응 반경 (픽셀 단위)
+
+        if (dist < snapRadius) {
+            // 비선형 가속도를 적용한 자성 끌림력 (가까울수록 자력이 제곱 비율로 증가)
+            const force = Math.pow((snapRadius - dist) / snapRadius, 1.5);
+            const targetX = e.clientX + (cylCenterX - e.clientX) * force;
+            const targetY = e.clientY + (cylCenterY - e.clientY) * force;
+
+            this.dragProxy.style.left = `${targetX - 22}px`;
+            this.dragProxy.style.top = `${targetY - 32}px`;
+            
+            // 약실 안으로 수축되는 시각적 피드백 효과 추가
+            this.dragProxy.style.transform = `scale(${1 - force * 0.15})`;
+            this.dragProxy.style.opacity = `${1 - force * 0.2}`;
+        } else {
+            this.dragProxy.style.left = `${e.clientX - 22}px`;
+            this.dragProxy.style.top = `${e.clientY - 32}px`;
+            this.dragProxy.style.transform = 'scale(1)';
+            this.dragProxy.style.opacity = '1';
+        }
     }
 
     cancelDrag() {
         if (!this.state.isDragging) return;
         this.state.isDragging = false;
         this.dragProxy.style.display = 'none';
+        this.dragProxy.style.transform = '';
+        this.dragProxy.style.opacity = '';
         window.removeEventListener('mousemove', this._boundMoveProxy);
         window.removeEventListener('mouseup', this._boundStopDrag);
     }
@@ -245,14 +278,20 @@ export class Revolver {
 
         if (!this.state.isOpen) return;
 
-        if (this.isPointOverRevolver(e.clientX, e.clientY)) {
+        if (this.isPointNearCylinder(e.clientX, e.clientY)) {
             this.tryLoadNextEmptyChamber();
         }
     }
 
-    isPointOverRevolver(x, y) {
-        const rect = this.revolverArea.getBoundingClientRect();
-        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    isPointNearCylinder(x, y) {
+        const cylRect = this.cylinder.getBoundingClientRect();
+        const cylCenterX = cylRect.left + cylRect.width / 2;
+        const cylCenterY = cylRect.top + cylRect.height / 2;
+        
+        const dist = Math.hypot(x - cylCenterX, y - cylCenterY);
+        const snapRadius = 160; // moveProxy와 동일한 탐지 반경 적용
+        
+        return dist <= snapRadius;
     }
 
     /** First empty chamber from active index forward (wraps), one bullet per drop. */

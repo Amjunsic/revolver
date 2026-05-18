@@ -8,6 +8,7 @@ export const BULLET_STATE = Object.freeze({
 /**
  * @param {{
  *   onScore?: (score: number) => void;
+ *   onLives?: (lives: number) => void;
  *   onChambersVisual?: () => void;
  * }} handlers
  */
@@ -20,6 +21,7 @@ export function createReactiveGameState(handlers) {
         currentIndex: 0,
         chambers: Array(6).fill(BULLET_STATE.LIVE),
         score: 0,
+        lives: 8,
         isDragging: false,
     };
 
@@ -57,6 +59,9 @@ export function createReactiveGameState(handlers) {
             switch (prop) {
                 case 'score':
                     handlers.onScore?.(value);
+                    break;
+                case 'lives':
+                    handlers.onLives?.(value);
                     break;
                 case 'currentIndex':
                 case 'chambers':

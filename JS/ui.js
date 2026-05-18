@@ -4,6 +4,7 @@ export class UIManager {
     /**
      * @param {{
      *   scoreDisplay: HTMLElement;
+     *   livesDisplay: HTMLElement;
      *   statusText: HTMLElement;
      *   comboDisplay: HTMLElement;
      *   feverTimer: HTMLElement;
@@ -15,6 +16,7 @@ export class UIManager {
      */
     constructor(els) {
         this.scoreDisplay = els.scoreDisplay;
+        this.livesDisplay = els.livesDisplay;
         this.statusText = els.statusText;
         this.comboDisplay = els.comboDisplay;
         this.feverTimer = els.feverTimer;
@@ -27,6 +29,10 @@ export class UIManager {
 
     setScore(score) {
         this.scoreDisplay.innerText = `SCORE: ${score}`;
+    }
+
+    setLives(lives) {
+        this.livesDisplay.innerText = `LIVES: ${lives}`;
     }
 
     setCombo(combo) {

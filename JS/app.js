@@ -9,6 +9,7 @@ class Game {
         this.els = Game.cacheElements();
         this.ui = new UIManager({
             scoreDisplay: this.els.scoreDisplay,
+            livesDisplay: this.els.livesDisplay,
             statusText: this.els.statusText,
             comboDisplay: this.els.comboDisplay,
             feverTimer: this.els.feverTimer,
@@ -22,6 +23,7 @@ class Game {
 
         this.reactive = createReactiveGameState({
             onScore: (v) => this.ui.setScore(v),
+            onLives: (v) => this.ui.setLives(v),
             onChambersVisual: () => revolverRef?.renderCylinder(),
         });
 
@@ -40,7 +42,11 @@ class Game {
             onFeverEnd: () => this.ui.stopFeverTimer(),
         });
 
-        this.enemyManager = new EnemyManager(this.els.combatZone, () => this.reactive.state.score);
+        this.enemyManager = new EnemyManager(
+            this.els.combatZone,
+            () => this.reactive.state.isOpen,
+            () => this.onEnemyPassedDeadline()
+        );
 
         this.revolver = new Revolver(
             {
@@ -60,6 +66,7 @@ class Game {
         );
         revolverRef = this.revolver;
         this.gameStarted = false;
+        this.lastTime = 0;
 
         this._boundKey = (e) => {
             if (!this.gameStarted) return;
@@ -89,6 +96,7 @@ class Game {
             combatZone: /** @type {HTMLElement} */ (document.getElementById('combat-zone')),
             statusText: /** @type {HTMLElement} */ (document.getElementById('status-text')),
             scoreDisplay: /** @type {HTMLElement} */ (document.getElementById('score-display')),
+            livesDisplay: /** @type {HTMLElement} */ (document.getElementById('lives-display')),
             dragProxy: /** @type {HTMLElement} */ (document.getElementById('drag-proxy')),
             muzzleFlash: /** @type {HTMLElement} */ (document.getElementById('muzzle-flash')),
             comboDisplay: /** @type {HTMLElement} */ (document.getElementById('combo-display')),
@@ -104,6 +112,7 @@ class Game {
 
     init() {
         this.ui.setScore(this.reactive.state.score);
+        this.ui.setLives(this.reactive.state.lives);
         this.ui.setCombo(0);
         this.revolver.initPouch();
         this.revolver.setAmmoPanelVisible(false);
@@ -131,10 +140,18 @@ class Game {
                 setTimeout(() => {
                     this.els.startOverlay.style.display = 'none';
                     this.gameStarted = true;
-                    this.loop();
+                    this.lastTime = performance.now();
+                    this.loop(this.lastTime);
                 }, 300); // Wait for fade-out transition
             }
         }, 1000);
+    }
+
+    onEnemyPassedDeadline() {
+        let lives = this.reactive.state.lives;
+        if (lives > 0) {
+            this.reactive.state.lives = lives - 1;
+        }
     }
 
     attachGlobalListeners() {
@@ -145,10 +162,14 @@ class Game {
         window.addEventListener('contextmenu', (e) => e.preventDefault());
     }
 
-    loop() {
+    loop(timestamp) {
+        if (this.lastTime === 0) this.lastTime = timestamp;
+        const dt = timestamp - this.lastTime;
+        this.lastTime = timestamp;
+
         this.comboFever.update();
-        this.enemyManager.trySpawn();
-        requestAnimationFrame(() => this.loop());
+        this.enemyManager.update(dt);
+        requestAnimationFrame((ts) => this.loop(ts));
     }
 }
 

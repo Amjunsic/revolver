@@ -21,7 +21,7 @@ export class EnemyManager {
         if (this.enemies.length < this.maxEnemies) {
             this.spawnTimer += dt;
             if (this.spawnTimer >= this.spawnInterval) {
-                this.spawnTimer -= this.spawnInterval;
+                this.spawnTimer = 0;
                 this.spawnEnemy();
             }
         } else {

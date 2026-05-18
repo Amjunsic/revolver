@@ -200,7 +200,7 @@ class Game {
         }
         
         if (this.lastTime === 0) this.lastTime = timestamp;
-        const dt = timestamp - this.lastTime;
+        const dt = Math.min(timestamp - this.lastTime, 100);
         this.lastTime = timestamp;
 
         this.comboFever.update();

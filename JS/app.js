@@ -59,17 +59,24 @@ class Game {
             this.comboFever,
         );
         revolverRef = this.revolver;
+        this.gameStarted = false;
 
         this._boundKey = (e) => {
+            if (!this.gameStarted) return;
             if (e.key.toLowerCase() === 'r') this.revolver.toggleCylinder();
         };
         this._boundCombatMouse = (e) => {
+            if (!this.gameStarted) return;
             if (!this.reactive.state.isDragging) this.revolver.fire(e);
         };
         this._boundCombatMove = (e) => {
+            if (!this.gameStarted) return;
             this.ui.updateCrosshairAura(e.clientX, e.clientY, this.comboFever.combo);
         };
-        this._boundCombatLeave = () => this.ui.hideCrosshairAura();
+        this._boundCombatLeave = () => {
+            if (!this.gameStarted) return;
+            this.ui.hideCrosshairAura();
+        };
     }
 
     static cacheElements() {
@@ -89,6 +96,9 @@ class Game {
             feverTimerFill: /** @type {HTMLElement} */ (document.getElementById('fever-timer-fill')),
             feverVignette: /** @type {HTMLElement} */ (document.getElementById('fever-vignette')),
             crosshairAura: /** @type {HTMLElement} */ (document.getElementById('crosshair-aura')),
+            startOverlay: /** @type {HTMLElement} */ (document.getElementById('start-overlay')),
+            startBtn: /** @type {HTMLElement} */ (document.getElementById('start-btn')),
+            countdownDisplay: /** @type {HTMLElement} */ (document.getElementById('countdown-display')),
         };
     }
 
@@ -99,7 +109,32 @@ class Game {
         this.revolver.setAmmoPanelVisible(false);
         this.revolver.renderCylinder();
         this.attachGlobalListeners();
-        this.loop();
+        
+        this.els.startBtn.addEventListener('click', () => this.startSequence());
+    }
+
+    startSequence() {
+        this.els.startBtn.classList.add('hidden');
+        this.els.countdownDisplay.classList.remove('hidden');
+        let count = 3;
+        this.els.countdownDisplay.textContent = count.toString();
+        
+        const interval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                this.els.countdownDisplay.textContent = count.toString();
+            } else if (count === 0) {
+                this.els.countdownDisplay.textContent = 'GO!';
+            } else {
+                clearInterval(interval);
+                this.els.startOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    this.els.startOverlay.style.display = 'none';
+                    this.gameStarted = true;
+                    this.loop();
+                }, 300); // Wait for fade-out transition
+            }
+        }, 1000);
     }
 
     attachGlobalListeners() {

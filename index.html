@@ -12,6 +12,11 @@
 </head>
 <body>
 
+    <div id="start-overlay" class="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
+        <button id="start-btn" class="px-8 py-4 text-3xl font-black text-white bg-indigo-600 rounded-xl shadow-[0_0_20px_rgba(79,70,229,0.5)] hover:bg-indigo-500 hover:scale-105 transition-all">START COMBAT</button>
+        <div id="countdown-display" class="text-9xl font-black text-white hidden drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">3</div>
+    </div>
+
     <div id="muzzle-flash" class="muzzle-flash"></div>
     <div id="fever-vignette" class="fever-vignette" aria-hidden="true"></div>
 

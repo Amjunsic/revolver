@@ -151,7 +151,38 @@ class Game {
         let lives = this.reactive.state.lives;
         if (lives > 0) {
             this.reactive.state.lives = lives - 1;
+            if (this.reactive.state.lives === 0) {
+                this.gameOver();
+            }
         }
+    }
+
+    gameOver() {
+        this.gameStarted = false;
+
+        // Reset state
+        this.reactive.state.lives = 8;
+        this.reactive.state.score = 0;
+        this.reactive.state.chambers = Array(6).fill(BULLET_STATE.LIVE);
+        this.comboFever.combo = 0;
+        this.ui.setCombo(0);
+        if (this.comboFever.feverActive) {
+            this.comboFever.endFever();
+        }
+        
+        // Remove active enemies
+        this.enemyManager.enemies.forEach(e => e.el.remove());
+        this.enemyManager.enemies = [];
+        this.enemyManager.spawnTimer = 0;
+        
+        // Reset revolver state if needed
+        this.revolver.forceCloseCylinder();
+        
+        // Show start screen
+        this.els.startOverlay.style.display = 'flex';
+        this.els.startOverlay.style.opacity = '1';
+        this.els.startBtn.classList.remove('hidden');
+        this.els.countdownDisplay.classList.add('hidden');
     }
 
     attachGlobalListeners() {
@@ -163,6 +194,11 @@ class Game {
     }
 
     loop(timestamp) {
+        if (!this.gameStarted) {
+            this.lastTime = 0;
+            return;
+        }
+        
         if (this.lastTime === 0) this.lastTime = timestamp;
         const dt = timestamp - this.lastTime;
         this.lastTime = timestamp;

@@ -47,8 +47,6 @@ export class Revolver {
             this.pouch.appendChild(bullet);
         }
         this.pouch.addEventListener('mousedown', (e) => {
-            const round = e.target.closest(`.${POUCH_ROUND_CLASS}`);
-            if (!round || !this.pouch.contains(round)) return;
             e.stopPropagation();
             this.startDrag(e);
         });

@@ -107,6 +107,9 @@ class Game {
             startOverlay: /** @type {HTMLElement} */ (document.getElementById('start-overlay')),
             startBtn: /** @type {HTMLElement} */ (document.getElementById('start-btn')),
             countdownDisplay: /** @type {HTMLElement} */ (document.getElementById('countdown-display')),
+            // NEW: Developer UI to adjust spawn parameters
+            devMaxEnemies: /** @type {HTMLInputElement} */ (document.getElementById('dev-max-enemies')),
+            devSpawnInterval: /** @type {HTMLInputElement} */ (document.getElementById('dev-spawn-interval')),
         };
     }
 
@@ -120,6 +123,17 @@ class Game {
         this.attachGlobalListeners();
         
         this.els.startBtn.addEventListener('click', () => this.startSequence());
+
+        // NEW: Developer UI to adjust spawn parameters
+        this.els.devMaxEnemies.addEventListener('change', (e) => {
+            const val = parseInt(/** @type {HTMLInputElement} */ (e.target).value, 10);
+            if (!isNaN(val) && val > 0) this.enemyManager.maxEnemies = val;
+        });
+        
+        this.els.devSpawnInterval.addEventListener('change', (e) => {
+            const val = parseInt(/** @type {HTMLInputElement} */ (e.target).value, 10);
+            if (!isNaN(val) && val >= 100) this.enemyManager.spawnInterval = val;
+        });
     }
 
     startSequence() {

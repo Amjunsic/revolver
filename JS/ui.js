@@ -32,7 +32,7 @@ export class UIManager {
     }
 
     setLives(lives) {
-        this.livesDisplay.innerText = `LIVES: ${lives}`;
+        this.livesDisplay.innerHTML = `LIVES: ${lives} <img src="./asset/lives_icon_1779192466132.png" alt="Life" style="height: 1em; display: inline-block;">`;
     }
 
     setCombo(combo) {

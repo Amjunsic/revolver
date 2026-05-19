@@ -11,7 +11,7 @@ body {
 
 .combat-zone {
     height: 60vh;
-    background: linear-gradient(to bottom, #0f172a 0%, #05070a 100%);
+    background: url('./asset/combat_bg_1779192422536.png') center/cover no-repeat;
     position: relative;
     cursor: crosshair;
     border-bottom: 2px solid #1e293b;
@@ -19,7 +19,7 @@ body {
 
 .control-panel {
     height: 40vh;
-    background-color: #0f172a;
+    background: url('./asset/table_bg_1779192436983.png') center/cover no-repeat;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -68,8 +68,11 @@ body {
 .cylinder {
     width: 300px;
     height: 300px;
-    background: #1e293b;
-    border: 10px solid #334155;
+    background-color: transparent;
+    background-image: url('./asset/revolver_cylinder_1779192333090.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     border-radius: 50%;
     position: relative;
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
@@ -111,9 +114,11 @@ body {
 .bullet-visual {
     width: 45px;
     height: 65px;
-    background: linear-gradient(to bottom, #f59e0b, #d97706);
-    border-radius: 6px;
-    border-top: 4px solid #fbbf24;
+    background-color: transparent;
+    background-image: url('./asset/live_bullet_1779192348473.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     z-index: 5;
 }
@@ -121,19 +126,14 @@ body {
 .spent-shell {
     width: 45px;
     height: 45px;
-    background: #475569;
-    border-radius: 50%;
-    border: 5px solid #334155;
+    background-color: transparent;
+    background-image: url('./asset/spent_casing_1779192362769.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-.spent-shell::after {
-    content: '';
-    width: 12px;
-    height: 12px;
-    background: #1e293b;
-    border-radius: 50%;
 }
 
 .indicator {
@@ -151,8 +151,11 @@ body {
     position: absolute;
     width: 60px;
     height: 70px;
-    background-color: #ef4444;
-    border: 3px solid #b91c1c;
+    background-color: transparent;
+    background-image: url('./asset/enemy_sprite_1779192405424.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     border-radius: 12px;
     box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
 }
@@ -161,8 +164,11 @@ body {
     position: fixed;
     width: 120px;
     height: 120px;
-    background: radial-gradient(circle, #fbbf24 0%, transparent 70%);
-    border-radius: 50%;
+    background-color: transparent;
+    background-image: url('./asset/muzzle_flash_1779192382268.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     pointer-events: none;
     z-index: 200;
     opacity: 0;
@@ -296,11 +302,12 @@ body {
     opacity: 0;
     transform: scale(var(--aura-scale, 1));
     transition: opacity 0.15s ease;
-    background:
-        radial-gradient(circle, rgba(251, 191, 36, var(--aura-opacity, 0.5)) 0%, transparent 65%),
-        conic-gradient(from 0deg, transparent, rgba(251, 191, 36, 0.35), transparent, rgba(253, 224, 71, 0.4), transparent);
+    background-color: transparent;
+    background-image: url('./asset/crosshair_1779192451884.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     border-radius: 50%;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.35);
 }
 
 .crosshair-aura--visible {
@@ -319,8 +326,10 @@ body {
     z-index: 1000;
     width: 45px;
     height: 65px;
-    background: linear-gradient(to bottom, #f59e0b, #d97706);
-    border-radius: 6px;
-    border-top: 4px solid #fbbf24;
+    background-color: transparent;
+    background-image: url('./asset/live_bullet_1779192348473.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
